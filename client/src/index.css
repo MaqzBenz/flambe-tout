@@ -1,0 +1,214 @@
+@import "tailwindcss";
+
+/* ─── Charte « ticket de caisse / catalogue » ───────────────────────────────── */
+
+@theme {
+  --font-sans: "Archivo Variable", "Arial Narrow", Arial, sans-serif;
+  --font-mono: "Courier Prime", "Courier New", monospace;
+
+  --color-paper: #ece5d6;
+  --color-paper-deep: #e0d7c3;
+  --color-sheet: #fbf8f1;
+  --color-ink: #181613;
+  --color-ink-soft: #5c5649;
+  --color-ink-faint: #8f877a;
+  --color-rule: #c8bda6;
+  --color-tag: #c4291c;
+  --color-stamp: #24438f;
+  --color-ok: #2f6b3a;
+
+  --animate-drop: drop 0.45s cubic-bezier(0.2, 0.8, 0.25, 1) both;
+  --animate-stamp: stamp 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  --animate-print: print 0.5s steps(8) both;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-stretch: 100%;
+  color: var(--color-ink);
+  background-color: var(--color-paper);
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--color-paper);
+  /* grain de papier très léger */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.3 0 0 0 0 0.2 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+::selection {
+  background: var(--color-ink);
+  color: var(--color-sheet);
+}
+:focus-visible {
+  outline: 2px solid var(--color-tag);
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* Titres d'affiche : Archivo très condensé, capitales. */
+  .display {
+    font-family: var(--font-sans);
+    font-stretch: 62%;
+    font-weight: 850;
+    text-transform: uppercase;
+    line-height: 0.88;
+    letter-spacing: -0.005em;
+  }
+  .condensed {
+    font-stretch: 75%;
+  }
+  /* Petites étiquettes façon imprimé de caisse. */
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+  }
+
+  .sheet {
+    background: var(--color-sheet);
+    border: 1px solid var(--color-rule);
+    box-shadow: 0 1px 0 var(--color-rule), 0 18px 30px -24px rgb(40 30 10 / 0.45);
+  }
+
+  /* Ticket de caisse : bords dentelés en haut et en bas. */
+  .receipt {
+    background: var(--color-sheet);
+    font-family: var(--font-mono);
+    --tooth: 9px;
+    -webkit-mask:
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / var(--tooth) 51% repeat-x,
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / var(--tooth) 51% repeat-x;
+    mask:
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / var(--tooth) 51% repeat-x,
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / var(--tooth) 51% repeat-x;
+    padding-block: calc(var(--tooth) + 14px);
+    filter: drop-shadow(0 10px 14px rgb(40 30 10 / 0.18));
+  }
+
+  /* Ligne pointillée de perforation. */
+  .perf {
+    border: 0;
+    height: 0;
+    border-top: 2px dashed var(--color-rule);
+  }
+  .rule-double {
+    border: 0;
+    height: 5px;
+    border-top: 2px solid var(--color-ink);
+    border-bottom: 1px solid var(--color-ink);
+  }
+
+  /* Points de conduite entre un libellé et un prix. */
+  .leader {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4em;
+  }
+  .leader::after {
+    content: "";
+    order: 1;
+    flex: 1;
+    min-width: 1.5em;
+    border-bottom: 2px dotted var(--color-ink-faint);
+    transform: translateY(-0.25em);
+  }
+  .leader > :last-child {
+    order: 2;
+  }
+
+  /* Tampon encreur. */
+  .stamp {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-stretch: 70%;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.15em 0.5em;
+    border: 3px double currentColor;
+    border-radius: 4px;
+    mix-blend-mode: multiply;
+    opacity: 0.88;
+  }
+
+  /* Étiquette de prix (forme d'étiquette volante). */
+  .price-tag {
+    background: var(--color-tag);
+    color: var(--color-sheet);
+    clip-path: polygon(14px 0, 100% 0, 100% 100%, 14px 100%, 0 50%);
+    padding: 0.35em 0.7em 0.35em 1.4em;
+    position: relative;
+  }
+  .price-tag::before {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: calc(50% - 4px);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-paper);
+  }
+
+  /* Champ de formulaire : une simple ligne, comme sur un bon papier. */
+  .field-line {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid var(--color-ink);
+    border-radius: 0;
+    padding: 0.45rem 0.1rem;
+    font-size: 1.05rem;
+    color: var(--color-ink);
+    outline: none;
+  }
+  .field-line::placeholder {
+    color: var(--color-ink-faint);
+  }
+  .field-line:focus {
+    border-bottom-color: var(--color-tag);
+    background: rgb(255 255 255 / 0.5);
+  }
+  .field-line:disabled {
+    opacity: 0.5;
+  }
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) rotate(-0.6deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: scale(2.2) rotate(var(--rot, -8deg));
+  }
+  to {
+    opacity: 0.88;
+    transform: scale(1) rotate(var(--rot, -8deg));
+  }
+}
+@keyframes print {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-drop,
+  .animate-stamp,
+  .animate-print {
+    animation: none;
+  }
+}
